@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
+import { Trash2 } from 'lucide-react'
 import { Badge, Card } from '@/components/ui'
-import { CONVERSATIONS } from '@/data/mock'
+import { useAuth } from '@/contexts/AuthContext'
+import { useData } from '@/contexts/DataContext'
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString('en-GB', {
@@ -12,13 +14,17 @@ function formatDate(iso: string): string {
 }
 
 export function ConversationsPage() {
-  const [selectedId, setSelectedId] = useState(CONVERSATIONS[0]?.id ?? '')
+  const { profile } = useAuth()
+  const { conversations, deleteConversation } = useData()
+  const isAdmin = profile?.role === 'admin'
+
+  const [selectedId, setSelectedId] = useState('')
   const [query, setQuery] = useState('')
   const [channelFilter, setChannelFilter] = useState<'all' | 'chat' | 'voice'>('all')
 
   const filtered = useMemo(() => {
     const text = query.trim().toLowerCase()
-    return CONVERSATIONS.filter((conv) => {
+    return conversations.filter((conv) => {
       if (channelFilter !== 'all' && conv.channel !== channelFilter) return false
       if (!text) return true
       return (
@@ -27,7 +33,7 @@ export function ConversationsPage() {
         conv.transcript.some((m) => m.content.toLowerCase().includes(text))
       )
     })
-  }, [query, channelFilter])
+  }, [conversations, query, channelFilter])
 
   const selected =
     filtered.find((conv) => conv.id === selectedId) ?? filtered[0] ?? null
@@ -103,6 +109,21 @@ export function ConversationsPage() {
                 {selected.channel === 'voice' ? 'Voice session' : 'Text chat'}
               </Badge>
               {selected.leadCaptured && <Badge tone="green">Lead captured</Badge>}
+              {isAdmin && (
+                <button
+                  type="button"
+                  className="ui-btn ui-btn--danger"
+                  title="Delete conversation"
+                  onClick={() => {
+                    if (window.confirm('Delete this conversation transcript?')) {
+                      deleteConversation(selected.id)
+                      setSelectedId('')
+                    }
+                  }}
+                >
+                  <Trash2 size={13} />
+                </button>
+              )}
             </div>
           )
         }
@@ -121,13 +142,15 @@ export function ConversationsPage() {
               </div>
             ))}
 
-            <div className="transcript__rating">
-              Visitor satisfaction:{' '}
-              <span className="transcript__stars">
-                {'★'.repeat(selected.satisfaction)}
-                {'☆'.repeat(5 - selected.satisfaction)}
-              </span>
-            </div>
+            {selected.satisfaction > 0 && (
+              <div className="transcript__rating">
+                Visitor satisfaction:{' '}
+                <span className="transcript__stars">
+                  {'★'.repeat(selected.satisfaction)}
+                  {'☆'.repeat(5 - selected.satisfaction)}
+                </span>
+              </div>
+            )}
           </div>
         ) : (
           <p className="table-empty">No session selected.</p>

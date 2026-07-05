@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Save } from 'lucide-react'
 import { Badge, Card, Toggle } from '@/components/ui'
-import { WIDGET_TEMPLATES } from '@/data/mock'
+import { useData } from '@/contexts/DataContext'
+import { ORB_THEMES, WIDGET_TEMPLATES } from '@/data/templates'
 import type { WidgetTemplate } from '@/types'
 
 type CustomTheme = {
@@ -11,6 +13,8 @@ type CustomTheme = {
 }
 
 export function SettingsPage() {
+  const { settingsData, saveSettings } = useData()
+
   const [apiKey, setApiKey] = useState('sk-************************D4kA')
   const [showKey, setShowKey] = useState(false)
   const [model, setModel] = useState('gpt-4o-mini')
@@ -29,13 +33,34 @@ export function SettingsPage() {
     surface: '#faf8f3',
     text: '#1a1a1a',
   })
+  const [orbThemeId, setOrbThemeId] = useState('gold')
   const [radius, setRadius] = useState(22)
   const [position, setPosition] = useState<'right' | 'left'>('right')
   const [welcomeTitle, setWelcomeTitle] = useState('Professional Kitchen & Laundry')
   const [saved, setSaved] = useState(false)
 
+  // Hydrate from persisted settings once they arrive
+  useEffect(() => {
+    const data = settingsData as Record<string, never>
+    if (!data || Object.keys(data).length === 0) return
+    if (data['model']) setModel(data['model'])
+    if (data['voiceModel']) setVoiceModel(data['voiceModel'])
+    if (data['voiceName']) setVoiceName(data['voiceName'])
+    if (typeof data['chatbotEnabled'] === 'boolean') setChatbotEnabled(data['chatbotEnabled'])
+    if (typeof data['voiceEnabled'] === 'boolean') setVoiceEnabled(data['voiceEnabled'])
+    if (typeof data['leadCapture'] === 'boolean') setLeadCapture(data['leadCapture'])
+    if (typeof data['showBranding'] === 'boolean') setShowBranding(data['showBranding'])
+    if (data['templateId']) setTemplateId(data['templateId'])
+    if (data['custom']) setCustom(data['custom'])
+    if (data['orbThemeId']) setOrbThemeId(data['orbThemeId'])
+    if (typeof data['radius'] === 'number') setRadius(data['radius'])
+    if (data['position']) setPosition(data['position'])
+    if (data['welcomeTitle']) setWelcomeTitle(data['welcomeTitle'])
+  }, [settingsData])
+
   const activeTemplate = WIDGET_TEMPLATES.find((t) => t.id === templateId)
   const theme: CustomTheme = templateId === 'custom' ? custom : (activeTemplate ?? custom)
+  const orbTheme = ORB_THEMES.find((orb) => orb.id === orbThemeId) ?? ORB_THEMES[0]
 
   const applyTemplate = (template: WidgetTemplate) => {
     setTemplateId(template.id)
@@ -47,7 +72,22 @@ export function SettingsPage() {
     })
   }
 
-  const save = () => {
+  const save = async () => {
+    await saveSettings({
+      model,
+      voiceModel,
+      voiceName,
+      chatbotEnabled,
+      voiceEnabled,
+      leadCapture,
+      showBranding,
+      templateId,
+      custom,
+      orbThemeId,
+      radius,
+      position,
+      welcomeTitle,
+    })
     setSaved(true)
     setTimeout(() => setSaved(false), 2200)
   }
@@ -207,6 +247,36 @@ export function SettingsPage() {
         </div>
       </Card>
 
+      {/* Voice orb themes */}
+      <Card
+        title="Voice agent orb"
+        subtitle="Pick the 3D orb style visitors see during voice conversations"
+        actions={<Badge tone="gold">{orbTheme.name}</Badge>}
+      >
+        <div className="orb-grid">
+          {ORB_THEMES.map((orb) => (
+            <button
+              key={orb.id}
+              type="button"
+              className={`orb-card${orbThemeId === orb.id ? ' orb-card--active' : ''}`}
+              onClick={() => setOrbThemeId(orb.id)}
+            >
+              <span className="orb-card__stage">
+                <span
+                  className="orb-card__orb"
+                  style={{
+                    background: `radial-gradient(circle at 32% 28%, ${orb.glow}, ${orb.core} 58%, #05050a 130%)`,
+                    boxShadow: `0 0 24px ${orb.core}66, 0 10px 26px rgba(0,0,0,0.35), inset 0 -6px 14px rgba(0,0,0,0.35)`,
+                  }}
+                />
+                <span className="orb-card__ring" style={{ borderColor: `${orb.core}55` }} />
+              </span>
+              <p className="orb-card__name">{orb.name}</p>
+            </button>
+          ))}
+        </div>
+      </Card>
+
       <div className="settings-grid">
         {/* Custom theme */}
         <Card title="Custom theme" subtitle="Fine-tune widget colors and shape">
@@ -329,9 +399,9 @@ export function SettingsPage() {
 
       <div className="settings-save">
         <button type="button" className="ui-btn ui-btn--primary ui-btn--lg" onClick={save}>
-          Save all settings
+          <Save size={14} /> Save all settings
         </button>
-        {saved && <Badge tone="green">Saved</Badge>}
+        {saved && <Badge tone="green">Saved to Supabase</Badge>}
       </div>
     </div>
   )

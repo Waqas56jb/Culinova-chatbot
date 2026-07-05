@@ -11,9 +11,23 @@ type StreamEvent =
   | { type: 'done'; message: ChatMessage }
   | { type: 'error'; error: string }
 
-function toPayload(messages: ChatMessage[]): { messages: ChatApiMessage[] } {
+function getSessionId(): string {
+  const key = 'culinova-chat-session'
+  let id = sessionStorage.getItem(key)
+  if (!id) {
+    id = crypto.randomUUID()
+    sessionStorage.setItem(key, id)
+  }
+  return id
+}
+
+function toPayload(messages: ChatMessage[]): {
+  messages: ChatApiMessage[]
+  sessionId: string
+} {
   return {
     messages: messages.map(({ role, content }) => ({ role, content })),
+    sessionId: getSessionId(),
   }
 }
 

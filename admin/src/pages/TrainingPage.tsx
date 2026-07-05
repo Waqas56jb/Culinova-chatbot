@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Badge, Card } from '@/components/ui'
-import { TRAINING_ENTRIES } from '@/data/mock'
+import { useData } from '@/contexts/DataContext'
 import type { TrainingEntry } from '@/types'
 
 const CATEGORIES = ['Company', 'Services', 'Process', 'Projects', 'Contact']
@@ -8,7 +8,7 @@ const CATEGORIES = ['Company', 'Services', 'Process', 'Projects', 'Contact']
 const EMPTY_FORM = { title: '', category: CATEGORIES[0], content: '' }
 
 export function TrainingPage() {
-  const [entries, setEntries] = useState<TrainingEntry[]>(TRAINING_ENTRIES)
+  const { training: entries, addTraining, updateTraining, deleteTraining } = useData()
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -33,45 +33,25 @@ export function TrainingPage() {
     setForm(EMPTY_FORM)
   }
 
-  const saveEntry = () => {
+  const saveEntry = async () => {
     if (!form.title.trim() || !form.content.trim()) return
 
-    const today = new Date().toISOString().slice(0, 10)
-
     if (editingId) {
-      setEntries((prev) =>
-        prev.map((entry) =>
-          entry.id === editingId
-            ? { ...entry, ...form, updatedAt: today }
-            : entry,
-        ),
-      )
+      await updateTraining(editingId, form)
     } else {
-      setEntries((prev) => [
-        {
-          id: `T-${String(prev.length + 1).padStart(2, '0')}`,
-          ...form,
-          status: 'draft',
-          updatedAt: today,
-        },
-        ...prev,
-      ])
+      await addTraining(form)
     }
     resetForm()
   }
 
-  const toggleStatus = (id: string) => {
-    setEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === id
-          ? { ...entry, status: entry.status === 'published' ? 'draft' : 'published' }
-          : entry,
-      ),
-    )
+  const toggleStatus = (entry: TrainingEntry) => {
+    updateTraining(entry.id, {
+      status: entry.status === 'published' ? 'draft' : 'published',
+    })
   }
 
   const removeEntry = (id: string) => {
-    setEntries((prev) => prev.filter((entry) => entry.id !== id))
+    deleteTraining(id)
     if (editingId === id) resetForm()
   }
 
@@ -123,7 +103,7 @@ export function TrainingPage() {
                 <button type="button" className="ui-btn" onClick={() => startEdit(entry)}>
                   Edit
                 </button>
-                <button type="button" className="ui-btn" onClick={() => toggleStatus(entry.id)}>
+                <button type="button" className="ui-btn" onClick={() => toggleStatus(entry)}>
                   {entry.status === 'published' ? 'Unpublish' : 'Publish'}
                 </button>
                 <button

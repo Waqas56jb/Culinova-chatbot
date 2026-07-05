@@ -2,6 +2,7 @@ import cors from 'cors'
 import express from 'express'
 import { env } from './config/env.js'
 import { errorHandler } from './middleware/errorHandler.js'
+import { adminRouter } from './routes/admin.routes.js'
 import { chatRouter } from './routes/chat.routes.js'
 import { healthRouter } from './routes/health.routes.js'
 import { voiceRouter } from './routes/voice.routes.js'
@@ -47,6 +48,7 @@ export function createApp() {
   app.use('/api/health', healthRouter)
   app.use('/api/chat', chatRouter)
   app.use('/api/voice', voiceRouter)
+  app.use('/api/admin', adminRouter)
 
   app.use(errorHandler)
 

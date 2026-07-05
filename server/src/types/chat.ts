@@ -14,6 +14,7 @@ export type ChatMessageOutput = {
 
 export type ChatRequestBody = {
   messages: ChatMessageInput[]
+  sessionId?: string
 }
 
 export type ChatResponseBody = {

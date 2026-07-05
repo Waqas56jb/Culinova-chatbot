@@ -4,6 +4,28 @@ export type PageId =
   | 'conversations'
   | 'training'
   | 'settings'
+  | 'users'
+  | 'logs'
+  | 'account'
+
+export type UserRole = 'admin' | 'staff'
+
+export type AdminUser = {
+  id: string
+  email: string
+  fullName: string
+  role: UserRole
+  createdAt: string
+}
+
+export type AuditLog = {
+  id: number
+  actorEmail: string
+  action: string
+  target: string
+  detail: string
+  createdAt: string
+}
 
 export type LeadStatus = 'new' | 'contacted' | 'qualified' | 'closed'
 export type LeadSource = 'chat' | 'voice'
@@ -24,7 +46,7 @@ export type Lead = {
 export type TranscriptMessage = {
   role: 'user' | 'assistant'
   content: string
-  time: string
+  time?: string
 }
 
 export type Conversation = {
@@ -57,6 +79,13 @@ export type WidgetTemplate = {
   accent: string
   surface: string
   text: string
+}
+
+export type OrbTheme = {
+  id: string
+  name: string
+  core: string
+  glow: string
 }
 
 export type DailyPoint = {
