@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { CHAT_CONFIG } from '@/constants/chatConfig'
 
@@ -6,12 +5,17 @@ type ChatComposerProps = {
   value: string
   onChange: (value: string) => void
   onSend: () => void
+  onVoiceStart: () => void
   disabled?: boolean
 }
 
-export function ChatComposer({ value, onChange, onSend, disabled = false }: ChatComposerProps) {
-  const [isListening, setIsListening] = useState(false)
-
+export function ChatComposer({
+  value,
+  onChange,
+  onSend,
+  onVoiceStart,
+  disabled = false,
+}: ChatComposerProps) {
   const handleKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault()
@@ -21,15 +25,13 @@ export function ChatComposer({ value, onChange, onSend, disabled = false }: Chat
 
   return (
     <div className="chat-composer">
-      <div
-        className={`chat-composer__field${isListening ? ' chat-composer__field--listening' : ''}`}
-      >
+      <div className="chat-composer__field">
         <textarea
           className="chat-composer__input"
           value={value}
           onChange={(event) => onChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isListening ? 'Listening...' : CHAT_CONFIG.inputPlaceholder}
+          placeholder={CHAT_CONFIG.inputPlaceholder}
           rows={1}
           disabled={disabled}
           aria-label="Message input"
@@ -37,12 +39,11 @@ export function ChatComposer({ value, onChange, onSend, disabled = false }: Chat
 
         <button
           type="button"
-          className={`chat-composer__mic${isListening ? ' chat-composer__mic--active' : ''}`}
-          onClick={() => setIsListening((prev) => !prev)}
+          className="chat-composer__mic"
+          onClick={onVoiceStart}
           disabled={disabled}
-          aria-label={isListening ? 'Stop voice input' : 'Start voice input'}
-          aria-pressed={isListening}
-          title="Voice input"
+          aria-label="Start voice conversation"
+          title="Voice conversation"
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path

@@ -1,9 +1,8 @@
 import { useCallback, useState } from 'react'
 import { CHAT_CONFIG } from '@/constants/chatConfig'
 import { getAssistantReply } from '@/lib/chatResponses'
+import { streamChatMessage } from '@/services/chatApi'
 import type { ChatMessage, ChatPhase } from '@/types'
-
-const TYPING_DELAY_MS = 700
 
 function createMessage(role: ChatMessage['role'], content: string): ChatMessage {
   return {
@@ -32,30 +31,90 @@ export function useChat() {
     setInputValue('')
   }, [])
 
-  const replyToUser = useCallback(async (text: string) => {
-    const trimmed = text.trim()
-    if (!trimmed || isTyping) return
+  const replyToUser = useCallback(
+    async (text: string, historyOverride?: ChatMessage[]) => {
+      const trimmed = text.trim()
+      if (!trimmed || isTyping) return
 
-    setMessages((prev) => [...prev, createMessage('user', trimmed)])
-    setInputValue('')
-    setIsTyping(true)
+      const userMessage = createMessage('user', trimmed)
+      const base = historyOverride ?? messages
+      const nextMessages = [...base, userMessage]
+      const assistantId = crypto.randomUUID()
 
-    await new Promise((resolve) => setTimeout(resolve, TYPING_DELAY_MS))
+      setMessages(nextMessages)
+      setInputValue('')
+      setIsTyping(true)
 
-    const reply = getAssistantReply(trimmed)
-    setMessages((prev) => [...prev, createMessage('assistant', reply)])
-    setIsTyping(false)
-  }, [isTyping])
+      try {
+        const finalMessage = await streamChatMessage(nextMessages, (content) => {
+          setIsTyping(false)
+          setMessages((prev) => {
+            const existing = prev.find((message) => message.id === assistantId)
+            if (!existing) {
+              return [
+                ...prev,
+                {
+                  id: assistantId,
+                  role: 'assistant' as const,
+                  content,
+                  createdAt: new Date().toISOString(),
+                },
+              ]
+            }
+            return prev.map((message) =>
+              message.id === assistantId ? { ...message, content } : message,
+            )
+          })
+        })
+
+        setMessages((prev) =>
+          prev.map((message) => (message.id === assistantId ? finalMessage : message)),
+        )
+      } catch {
+        const fallback = getAssistantReply(trimmed)
+        setMessages((prev) => {
+          const existing = prev.find((message) => message.id === assistantId)
+          if (existing) {
+            return prev.map((message) =>
+              message.id === assistantId ? { ...message, content: fallback } : message,
+            )
+          }
+          return [...prev, createMessage('assistant', fallback)]
+        })
+      } finally {
+        setIsTyping(false)
+      }
+    },
+    [isTyping, messages],
+  )
 
   const sendMessage = useCallback(() => {
     void replyToUser(inputValue)
   }, [inputValue, replyToUser])
 
+  const importVoiceTranscript = useCallback(
+    (entries: { role: 'user' | 'assistant'; content: string }[]) => {
+      if (entries.length === 0) return
+
+      const transcriptMessages = entries.map((entry) => createMessage(entry.role, entry.content))
+
+      setPhase('conversation')
+      setMessages((prev) =>
+        prev.length === 0
+          ? [createMessage('assistant', CHAT_CONFIG.initialMessage), ...transcriptMessages]
+          : [...prev, ...transcriptMessages],
+      )
+    },
+    [],
+  )
+
   const sendQuickAction = useCallback(
     (prompt: string) => {
       if (phase === 'welcome') {
         setPhase('conversation')
-        setMessages([createMessage('assistant', CHAT_CONFIG.initialMessage)])
+        const initial = [createMessage('assistant', CHAT_CONFIG.initialMessage)]
+        void replyToUser(prompt, initial)
+        return
       }
       void replyToUser(prompt)
     },
@@ -72,5 +131,6 @@ export function useChat() {
     resetChat,
     sendMessage,
     sendQuickAction,
+    importVoiceTranscript,
   }
 }

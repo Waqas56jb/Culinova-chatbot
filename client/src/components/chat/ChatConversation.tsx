@@ -11,6 +11,7 @@ type ChatConversationProps = {
   onInputChange: (value: string) => void
   onSend: () => void
   onQuickAction: (prompt: string) => void
+  onVoiceStart: () => void
 }
 
 export function ChatConversation({
@@ -20,6 +21,7 @@ export function ChatConversation({
   onInputChange,
   onSend,
   onQuickAction,
+  onVoiceStart,
 }: ChatConversationProps) {
   const showQuickActions = messages.length <= 1 && !isTyping
 
@@ -36,6 +38,7 @@ export function ChatConversation({
           value={inputValue}
           onChange={onInputChange}
           onSend={onSend}
+          onVoiceStart={onVoiceStart}
           disabled={isTyping}
         />
         <ChatFooter />

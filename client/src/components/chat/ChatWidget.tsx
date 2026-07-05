@@ -1,11 +1,14 @@
+import { useState } from 'react'
 import { ChatConversation } from '@/components/chat/ChatConversation'
 import { ChatFooter } from '@/components/chat/ChatFooter'
 import { ChatHeader } from '@/components/chat/ChatHeader'
 import { ChatShell } from '@/components/chat/ChatShell'
+import { ChatVoiceOverlay } from '@/components/chat/ChatVoiceOverlay'
 import { ChatWelcome } from '@/components/chat/ChatWelcome'
 import { useChat } from '@/hooks/useChat'
 
 export function ChatWidget() {
+  const [voiceOpen, setVoiceOpen] = useState(false)
   const {
     phase,
     messages,
@@ -16,6 +19,7 @@ export function ChatWidget() {
     resetChat,
     sendMessage,
     sendQuickAction,
+    importVoiceTranscript,
   } = useChat()
 
   return (
@@ -37,9 +41,19 @@ export function ChatWidget() {
               onInputChange={setInputValue}
               onSend={sendMessage}
               onQuickAction={sendQuickAction}
+              onVoiceStart={() => setVoiceOpen(true)}
             />
           )}
         </div>
+
+        {voiceOpen && (
+          <ChatVoiceOverlay
+            onClose={(transcript) => {
+              setVoiceOpen(false)
+              importVoiceTranscript(transcript)
+            }}
+          />
+        )}
       </div>
     </ChatShell>
   )
