@@ -7,10 +7,19 @@ import { chatRouter } from './routes/chat.routes.js'
 import { healthRouter } from './routes/health.routes.js'
 import { voiceRouter } from './routes/voice.routes.js'
 
+/** Deployed frontends — always allowed, independent of CORS_ORIGIN env. */
+const DEPLOYED_ORIGINS = [
+  'https://culinova-chatbot-client.vercel.app',
+  'https://culinova-chatbot-admin.vercel.app',
+]
+
 export function createApp() {
   const app = express()
 
-  const allowedOrigins = env.CORS_ORIGIN.split(',').map((origin) => origin.trim())
+  const allowedOrigins = [
+    ...DEPLOYED_ORIGINS,
+    ...env.CORS_ORIGIN.split(',').map((origin) => origin.trim()),
+  ]
   // Any localhost / private-LAN origin (any port) is fine outside production,
   // so dev servers on 5173..5199 and phones on the LAN all work.
   const devOriginPattern =
