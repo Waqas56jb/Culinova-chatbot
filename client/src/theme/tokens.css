@@ -1,0 +1,31 @@
+:root {
+  /* Brand palette */
+  --culinova-black: #050505;
+  --culinova-charcoal: #111111;
+  --culinova-graphite: #1a1a1a;
+  --culinova-gold: #d4af37;
+  --culinova-gold-light: #f0dfa0;
+  --culinova-gold-dark: #9a7b2f;
+  --culinova-gold-muted: #7a6530;
+  --culinova-white: #ffffff;
+  --culinova-cream: #faf8f3;
+  --culinova-cream-dark: #f0ebe2;
+  --culinova-ink: #141414;
+  --culinova-muted: #7a7568;
+  --culinova-online: #5ecf7a;
+
+  /* Phone frame — fits viewport without page scroll */
+  --chat-width: min(calc(100vw - 1.5rem), 375px);
+  --chat-height: min(calc(100dvh - 1.5rem), 612px);
+  --chat-radius: 22px;
+  --chat-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.18),
+    0 24px 60px rgba(0, 0, 0, 0.65),
+    0 0 80px rgba(212, 175, 55, 0.06);
+
+  /* Typography */
+  --font-serif: 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --chat-header-bg: linear-gradient(120deg, #080808 0%, #15120c 55%, #2a2212 100%);
+}
