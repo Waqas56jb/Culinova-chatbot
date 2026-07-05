@@ -26,7 +26,7 @@ export function createApp() {
         }
         callback(null, false)
       },
-      methods: ['GET', 'POST', 'OPTIONS'],
+      methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     }),
   )
 
