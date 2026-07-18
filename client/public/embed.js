@@ -30,7 +30,7 @@
   var baseUrl = (
     cfg.baseUrl ||
     (script && script.getAttribute('data-base-url')) ||
-    (script && script.src ? script.src.replace(/\/embed\.js(\?.*)?$/, '') : '') ||
+    (script && script.src ? script.src.replace(/\/(embed|widget)\.js(\?.*)?$/, '') : '') ||
     'https://culinova-chatbot-client.vercel.app'
   ).replace(/\/$/, '')
 
