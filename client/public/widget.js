@@ -2,11 +2,7 @@
  * Culinova Chatbot — embeddable floating widget
  *
  * Paste on any site:
- *   <script
- *     src="https://culinova-chatbot-client.vercel.app/embed.js"
- *     data-position="right"
- *     async
- *   ></script>
+ *   <script src="https://culinova-chatbot-client.vercel.app/widget.js" async></script>
  *
  * Optional: window.CulinovaChat = { position: 'left'|'right', baseUrl: '...' }
  */
@@ -21,7 +17,8 @@
     (function () {
       var scripts = document.getElementsByTagName('script')
       for (var i = scripts.length - 1; i >= 0; i--) {
-        if ((scripts[i].src || '').indexOf('embed.js') !== -1) return scripts[i]
+        var src = scripts[i].src || ''
+        if (src.indexOf('widget.js') !== -1 || src.indexOf('embed.js') !== -1) return scripts[i]
       }
       return null
     })()

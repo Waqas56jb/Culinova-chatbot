@@ -35,14 +35,10 @@ Open `http://localhost:5173`.
 Paste this before `</body>` on any page:
 
 ```html
-<script
-  src="https://culinova-chatbot-client.vercel.app/embed.js"
-  data-position="right"
-  async
-></script>
+<script src="https://culinova-chatbot-client.vercel.app/widget.js" async></script>
 ```
 
-- `data-position`: `right` (default) or `left`
+- Optional: `data-position="left"` or `data-position="right"`
 - Local preview: `http://localhost:5173/embed-demo.html`
 - Direct chat URL: `https://culinova-chatbot-client.vercel.app/?embed=1`
 
