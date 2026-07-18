@@ -1,10 +1,16 @@
 import { CulinovaLogo } from '@/components/branding/CulinovaLogo'
+import { isEmbedMode, requestEmbedClose } from '@/lib/embedMode'
 
 type ChatHeaderProps = {
   onClose: () => void
 }
 
 export function ChatHeader({ onClose }: ChatHeaderProps) {
+  function handleClose() {
+    onClose()
+    if (isEmbedMode()) requestEmbedClose()
+  }
+
   return (
     <header className="chat-header">
       <div className="chat-header__inner">
@@ -21,7 +27,7 @@ export function ChatHeader({ onClose }: ChatHeaderProps) {
           <button
             type="button"
             className="chat-header__close"
-            onClick={onClose}
+            onClick={handleClose}
             aria-label="Close chat"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">

@@ -15,6 +15,25 @@
   overflow: hidden;
 }
 
+/* Iframe embed: fill the host panel, no stage padding / phone chrome gap */
+.chat-page--embed {
+  padding: 0;
+  background: transparent;
+  place-items: stretch;
+}
+
+.chat-page--embed .chat-shell {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  animation: none;
+}
+
+.chat-page--embed .chat-widget {
+  border-radius: 0;
+  box-shadow: none;
+}
+
 .chat-page__backdrop {
   position: absolute;
   inset: 0;

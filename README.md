@@ -30,6 +30,22 @@ npm run dev
 
 Open `http://localhost:5173`.
 
+## Embed on your website
+
+Paste this before `</body>` on any page:
+
+```html
+<script
+  src="https://culinova-chatbot-client.vercel.app/embed.js"
+  data-position="right"
+  async
+></script>
+```
+
+- `data-position`: `right` (default) or `left`
+- Local preview: `http://localhost:5173/embed-demo.html`
+- Direct chat URL: `https://culinova-chatbot-client.vercel.app/?embed=1`
+
 ## Stack
 
 **Client:** React 19, TypeScript, Vite  
